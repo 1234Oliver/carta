@@ -11,7 +11,7 @@ const CONFIG = {
   /* ── Fecha de inicio de la relación ──────────────────── */
   // Formato: new Date(año, mes-1, día, hora, minuto)
   // Ejemplo: 14 de febrero de 2023 → new Date(2023, 1, 14, 0, 0)
-  startDate: new Date(2025, 8, 11, 0, 0),  // ✏️ CAMBIA esta fecha
+  startDate: new Date(2025, 7, 11, 0, 0),  // ✏️ CAMBIA esta fecha
 
   /* ── Frases románticas rotativas ─────────────────────── */
   // ✏️ Agrega, edita o elimina frases aquí
@@ -349,21 +349,35 @@ function initGallery() {
    ============================================================ */
 function initCounter() {
   function update() {
-    const now = new Date();
-    let ms = now - CONFIG.startDate;
+    const now   = new Date();
+    const start = CONFIG.startDate;
 
-    const YEAR  = 365.25 * 24 * 3600 * 1000;
-    const MONTH = 30.44  * 24 * 3600 * 1000;
-    const DAY   =          24 * 3600 * 1000;
-    const HOUR  =               3600 * 1000;
-    const MIN   =                 60 * 1000;
+    let years  = now.getFullYear() - start.getFullYear();
+    let months = now.getMonth()    - start.getMonth();
+    let days   = now.getDate()     - start.getDate();
 
-    const years  = Math.floor(ms / YEAR);  ms -= years  * YEAR;
-    const months = Math.floor(ms / MONTH); ms -= months * MONTH;
-    const days   = Math.floor(ms / DAY);   ms -= days   * DAY;
-    const hours  = Math.floor(ms / HOUR);  ms -= hours  * HOUR;
-    const mins   = Math.floor(ms / MIN);   ms -= mins   * MIN;
-    const secs   = Math.floor(ms / 1000);
+    // Ajustar si el día actual es menor al día de inicio
+    if (days < 0) {
+      months--;
+      const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+      days += prevMonth.getDate();
+    }
+
+    // Ajustar si los meses quedan negativos
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    // Horas, minutos y segundos del día actual
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+                                  start.getHours(), start.getMinutes(), start.getSeconds());
+    let ms    = now - startOfToday;
+    if (ms < 0) ms += 24 * 3600 * 1000;
+
+    const hours = Math.floor(ms / (3600 * 1000)); ms -= hours * 3600 * 1000;
+    const mins  = Math.floor(ms / (60   * 1000)); ms -= mins  *   60 * 1000;
+    const secs  = Math.floor(ms / 1000);
 
     const pad = n => String(n).padStart(2, '0');
     $('#c-years').textContent  = years;
